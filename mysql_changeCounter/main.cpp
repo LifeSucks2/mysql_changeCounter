@@ -19,11 +19,11 @@ int main()
 		Initialisierungen
 	*/
 	const string server = "tcp://127.0.0.6:6666";
-	string username = "";
-	string password = "";
+	string username, password, chIDAntwort, Kundenname, Ticketbeschreibung;
 	sql::Driver* driver;
 	sql::Connection* con;
 	sql::PreparedStatement* pstmt;
+	//sql::PreparedStatement* insert;
 	sql::ResultSet* result;
 	int id = 0;
 	
@@ -47,13 +47,7 @@ int main()
 
 	con->setSchema("changerepo");
 
-	/*
-		Insert Query
-
-		Beim Schreiben in die Tabelle Changes ist zu beachten, das die Row "ChanageID" Unique 
-		ist. Außerdem darf die Row "ID" nicht über die Query gefüllt werden, da diese die 
-		Auto_Increment eigenschaft besitzt. 
-	*/
+	
 	/*
 	pstmt = con->prepareStatement("INSERT INTO Changes(ChangeID, Kundenname, Beschreibung) VALUES(?, ?, ?);");
 	pstmt->setBigInt(1, "1007");
@@ -102,9 +96,38 @@ int main()
 	for (int i = 0; i < changeIDs.size(); i++) {
 		if (i < changeIDs.size()) {
 			if (changeIDs[i+1] - changeIDs[i] > 1) {
-				id = changeIDs[i+1];
+				id = changeIDs[i] + 1;
 				cout << "Freie ChangeID lautet: " << id << endl;
-				break;
+				cout << "ChangeID auswählen? Bitte mit Ja oder Nein antworten. "; 
+				cin >> chIDAntwort;
+
+				if (chIDAntwort == "ja" || chIDAntwort == "Ja" || chIDAntwort == "JA") {
+					cout << "Geben Sie den Kundennamen ein ";
+					cin >> Kundenname;
+					cout << "Geben Sie die Ticketbeschreibung ein ";
+					cin >> Ticketbeschreibung;
+					/*
+						Insert Query
+
+						Beim Schreiben in die Tabelle Changes ist zu beachten, das die Row "ChanageID" Unique
+						ist. Außerdem darf die Row "ID" nicht über die Query gefüllt werden, da diese die
+						Auto_Increment eigenschaft besitzt.
+					*/
+					pstmt = con->prepareStatement("INSERT INTO Changes(ChangeID, Kundenname, Beschreibung) VALUES(?, ?, ?);");
+					pstmt->setBigInt(1, to_string(id));
+					pstmt->setString(2, Kundenname);
+					pstmt->setString(3, Ticketbeschreibung);
+					pstmt->execute();
+					break;
+				}
+				if (chIDAntwort == "nein" || chIDAntwort == "Nein" || chIDAntwort == "NEIN") {
+					cout << "Programm wird geschlossen";
+					break;
+				}
+				else {
+					i--;
+					continue;
+				}
 			}
 		}
 	}
